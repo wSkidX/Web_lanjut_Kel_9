@@ -5,3 +5,7 @@ try{
     print"Koneksi atau query bermasalah: ".$e->getMessage()."<br/>";
     die();
 }
+<<<<<<< Updated upstream
+=======
+?>
+>>>>>>> Stashed changes
