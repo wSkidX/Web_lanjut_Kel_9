@@ -1,5 +1,5 @@
 <?php
-require_once 'koneksi.php'; // karena koneksi.php berada di folder yang sama (backend)
+require_once '../backend/koneksi.php'; // karena koneksi.php berada di folder yang sama (backend)
 
 if (isset($_GET['proses'])) {
     try {
