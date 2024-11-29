@@ -1,25 +1,44 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['email'])) {
-//     header('location:../login.php');
-// }
-// include 'koneksi.php'; 
-// $email = $_SESSION['email'];
+session_start();
+if (!isset($_SESSION['email'])) {
+    header('location:../login.php');
+    exit;
+}
+include '../backend/koneksi.php'; 
 
+try {
+    $email = $_SESSION['email'];
+    $stmt = $db->prepare("SELECT id, nama, email, password, level_id, foto, no_telp, alamat FROM user WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// $query = mysqli_query($db, "SELECT * FROM user WHERE email='$email'");
-// $user = mysqli_fetch_assoc($query);
+    if ($user) {
+        $_SESSION['user'] = [
+            'id' => $user['id'],
+            'nama' => $user['nama'],
+            'email' => $user['email'],
+            'level_id' => $user['level_id'],
+            'foto' => $user['foto'],
+            'no_telp' => $user['no_telp'],
+            'alamat' => $user['alamat']
+        ];
+    } else {
+        session_destroy();
+        header('location:../login.php');
+        exit;
+    }
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage();
+    exit;
+}
 
-// if ($user) {
-//     $nama = $user['nama'];
-//     $foto = $user['foto'];
-// } else {
-//     session_destroy();
-//     header('location:../login.php');
-//     exit;
-// }
+// Fungsi untuk mengecek menu aktif
+function isMenuActive($menu) {
+    return (isset($_GET['p']) && $_GET['p'] == $menu) ? 'active' : '';
+}
 ?>
-<!DOCTYPE html>
+
+<<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -28,13 +47,11 @@
     <title>Admin Dashboard | Teknologi Informasi</title>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css?v=3.2.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    </style>
+    <link href="../asset/css/style.css" rel="stylesheet">
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -68,12 +85,12 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : 'asset/default-profile.png'; ?>" class="user-image img-circle elevation-2" alt="User Image">
+                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" class="user-image img-circle elevation-2" alt="User Image">
                         <span class="d-none d-md-inline"><?php echo $user['nama']; ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <li class="user-header bg-primary">
-                            <img src="<?php echo !empty($user['foto']) ? $user['foto'] : 'asset/default-profile.png'; ?>" class="img-circle elevation-2" alt="User Image">
+                            <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" class="img-circle elevation-2" alt="User Image">
                             <p>
                                 <?php echo $user['nama']; ?>
                                 <small><?php echo $user['email']; ?></small>
@@ -95,14 +112,14 @@
 
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="index.php" class="brand-link">
-                <img src="asset/images.png" alt="TI Logo" class="brand-image img-circle elevation-2" style="opacity: .8; max-height: 35px; max-width: 45px; margin-left: auto; object-fit: cover; border-radius: 50%;">
+                <img src="../asset/images.png" alt="TI Logo" class="brand-image img-circle elevation-2" style="opacity: .8; max-height: 35px; max-width: 45px; margin-left: auto; object-fit: cover; border-radius: 50%;">
                 <span class="brand-text font-weight-light">TI Admin</span>
             </a>
 
             <div class="sidebar">
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : 'asset/default-profile.png'; ?>" class="img-circle elevation-2" alt="User Image">
+                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block"><?php echo $user['nama']; ?></a>
@@ -318,10 +335,10 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/plugins/jquery/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.js?v=3.2.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/plugins/chart.js/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/pages/dashboard3.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
