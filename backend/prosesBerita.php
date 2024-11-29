@@ -2,6 +2,15 @@
 session_start();
 include 'koneksi.php';
 
+// Tambahkan di awal file setelah include
+$upload_dir = "uploads/";
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
+
+// Pastikan permission folder uploads sudah benar
+chmod($upload_dir, 0777);
+
 try {
     if ($_GET['proses'] == 'insert') {
         // Handle file upload

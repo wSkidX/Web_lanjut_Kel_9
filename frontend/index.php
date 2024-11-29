@@ -1,40 +1,36 @@
 <?php
-session_start();
-if (!isset($_SESSION['email'])) {
-    header('location:../login.php');
-    exit;
-}
-include '../backend/koneksi.php'; 
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
+include '../backend/koneksi.php';
 
 try {
-    $email = $_SESSION['email'];
-    $stmt = $db->prepare("SELECT id, nama, email, password, level_id, foto, no_telp, alamat FROM user WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $_SESSION['user'];
+    $stmt = $db->prepare("SELECT user.*, level.nama_level 
+                         FROM user 
+                         JOIN level ON level.id = user.level_id 
+                         WHERE user.id = ?");
+    $stmt->execute([$user['id']]);
+    $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
+    if ($user_data) {
+        // Update session dengan data terbaru
         $_SESSION['user'] = [
-            'id' => $user['id'],
-            'nama' => $user['nama'],
-            'email' => $user['email'],
-            'level_id' => $user['level_id'],
-            'foto' => $user['foto'],
-            'no_telp' => $user['no_telp'],
-            'alamat' => $user['alamat']
+            'id' => $user_data['id'],
+            'nama' => $user_data['nama'],
+            'email' => $user_data['email'],
+            'level_id' => $user_data['level_id'],
+            'foto' => $user_data['foto'],
+            'level' => $user_data['nama_level']
         ];
     } else {
-        session_destroy();
-        header('location:../login.php');
+        // Jika user tidak ditemukan, logout
+        header('location: ../logout.php');
         exit;
     }
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
-    exit;
-}
-
-// Fungsi untuk mengecek menu aktif
-function isMenuActive($menu) {
-    return (isset($_GET['p']) && $_GET['p'] == $menu) ? 'active' : '';
+    die("Error: " . $e->getMessage());
 }
 ?>
 
@@ -45,13 +41,14 @@ function isMenuActive($menu) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Dashboard | Teknologi Informasi</title>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css?v=3.2.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../asset/css/style.css" rel="stylesheet">
+   
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -60,94 +57,79 @@ function isMenuActive($menu) {
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php?p=home" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='home') ? 'active' : '' ?>">Beranda</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php?p=mhs" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='mhs') ? 'active' : '' ?>">Mahasiswa</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php?p=matakuliah" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='matakuliah') ? 'active' : '' ?>">Matakuliah</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php?p=dosen" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='dosen') ? 'active' : '' ?>">Dosen</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php?p=prodi" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='prodi') ? 'active' : '' ?>">Program Studi</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php?p=berita" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='berita') ? 'active' : '' ?>">Berita</a>
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+                        <i class="fas fa-bars"></i>
+                    </a>
                 </li>
             </ul>
 
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" class="user-image img-circle elevation-2" alt="User Image">
-                        <span class="d-none d-md-inline"><?php echo $user['nama']; ?></span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <li class="user-header bg-primary">
-                            <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" class="img-circle elevation-2" alt="User Image">
-                            <p>
-                                <?php echo $user['nama']; ?>
-                                <small><?php echo $user['email']; ?></small>
-                            </p>
-                        </li>
-                        <li class="user-footer">
-                            <a href="index.php?p=akun" class="btn btn-default btn-flat">Settings</a>
-                            <a href="../logout.php" class="btn btn-default btn-flat float-right">Sign out</a>
-                        </li>
-                    </ul>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                         <i class="fas fa-expand-arrows-alt"></i>
                     </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" 
+                             class="img-circle" alt="User Image" 
+                             style="width: 30px; height: 30px; object-fit: cover;">
+                        <span class="d-none d-md-inline ml-1"><?php echo $user['nama']; ?></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a href="index.php?p=akun" class="dropdown-item">
+                            <i class="fas fa-user-cog mr-2"></i> Pengaturan Akun
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form action="../logout.php" method="POST" class="dropdown-item">
+                            <button type="submit" class="btn btn-link text-danger p-0" 
+                                    onclick="return confirm('Apakah Anda yakin ingin keluar?')">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+                            </button>
+                        </form>
+                    </div>
                 </li>
             </ul>
         </nav>
 
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="index.php" class="brand-link">
-                <img src="../asset/images.png" alt="TI Logo" class="brand-image img-circle elevation-2" style="opacity: .8; max-height: 35px; max-width: 45px; margin-left: auto; object-fit: cover; border-radius: 50%;">
+                <img src="../asset/images.png" alt="TI Logo" 
+                     class="brand-image img-circle elevation-2" 
+                     style="opacity: .8; max-height: 35px;">
                 <span class="brand-text font-weight-light">TI Admin</span>
             </a>
 
             <div class="sidebar">
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" class="img-circle elevation-2" alt="User Image">
+                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : 'asset/default-profile.png'; ?>" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block"><?php echo $user['nama']; ?></a>
                     </div>
                 </div>
-
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
                             <a href="index.php" class="nav-link <?= (!isset($_GET['p']) || $_GET['p']=='home') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-home"></i>
-                                <p>
-                                    Beranda
-                                </p>
+                                <p>Beranda</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+
+                        <li class="nav-item <?= (isset($_GET['p']) && $_GET['p']=='mhs') ? 'menu-open' : '' ?>">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='mhs') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-user-graduate"></i>
                                 <p>
                                     Mahasiswa
-                                    <i class="fas fa-angle-left right"></i>
+                                    <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="index.php?p=mhs&aksi=input" class="nav-link">
-                                        <i class="far fa-plus-square nav-icon "></i>
+                                        <i class="far fa-plus-square nav-icon"></i>
                                         <p>Tambah Mahasiswa</p>
                                     </a>
                                 </li>
@@ -159,6 +141,7 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='matakuliah') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-book"></i>
@@ -182,6 +165,7 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='prodi') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-graduation-cap"></i>
@@ -205,6 +189,7 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='dosen') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-chalkboard-teacher"></i>
@@ -228,6 +213,7 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='kategori') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-tags"></i>
@@ -251,6 +237,7 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='berita') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-newspaper"></i>
@@ -274,6 +261,7 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='level') ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-layer-group"></i>
@@ -297,14 +285,21 @@ function isMenuActive($menu) {
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item">
-                            <a href="index.php?p=akun" class="nav-link">
-                                <i class="nav-icon fas fa-user-cog"></i>
-                                <p>Pengaturan Akun</p>
-                            </a>
+
+                        <li class="nav-item mt-4">
+                            <div class="user-panel py-2 d-flex justify-content-center">
+                                <form action="../logout.php" method="POST" class="w-100">
+                                    <button type="submit" class="btn btn-logout w-100" 
+                                            onclick="return confirm('Apakah Anda yakin ingin keluar?')">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span class="ml-2">Keluar</span>
+                                    </button>
+                                </form>
+                            </div>
                         </li>
+                    </ul>
                 </nav>
-               
+            </div>
         </aside>
 
         <div class="content-wrapper">

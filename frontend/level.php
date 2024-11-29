@@ -1,4 +1,8 @@
 <?php
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
 include '../backend/koneksi.php';
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'list';
 switch ($aksi) {
@@ -33,7 +37,7 @@ switch ($aksi) {
                     <tbody>
                     <?php
                     try {
-                        $stmt = $dbh->query("SELECT * FROM level");
+                        $stmt = $db->query("SELECT * FROM level");
                         $no = 1;
                         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     ?>
@@ -116,7 +120,7 @@ switch ($aksi) {
 
     case 'edit':
     try {
-        $stmt = $dbh->prepare("SELECT * FROM level WHERE id = ?");
+        $stmt = $db->prepare("SELECT * FROM level WHERE id = ?");
         $stmt->execute([$_GET['id']]);
         $data_level = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>

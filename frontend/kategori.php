@@ -1,4 +1,8 @@
 <?php 
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
 include '../backend/koneksi.php';
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'list';
 switch ($aksi) {
@@ -33,7 +37,7 @@ switch ($aksi) {
                     <tbody>
                     <?php
                     try {
-                        $stmt = $dbh->query("SELECT * FROM kategori");
+                        $stmt = $db->query("SELECT * FROM kategori");
                         $no = 1;
                         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     ?>

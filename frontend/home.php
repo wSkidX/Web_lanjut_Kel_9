@@ -1,13 +1,15 @@
 <?php
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
 include '../backend/koneksi.php';
 ?>
 <div class="container-fluid mt-4">
     <div class="row mb-4">
         <div class="col-12 text-center">
             <h1 class="display-4 text-primary mb-3">Selamat Datang di Halaman Home</h1>
-            <p class="lead text-muted">Nama : Zaki Ramadhan</p>
-            <p class="lead text-muted">NIM : 2301082020</p>
-
+            <p class="lead text ">By : Kelompok 9</p>
         </div>
     </div>
 
@@ -100,7 +102,7 @@ include '../backend/koneksi.php';
                         ?>
                             <div class="col-md-4 mb-4">
                                 <div class="card h-100 shadow-sm hover-card">
-                                    <img src="uploads/<?= $berita['file_upload'] ?>" class="card-img-top" alt="<?= $berita['judul'] ?>" style="height: 200px; object-fit: cover;">
+                                    <img src="../backend/uploads/<?= $berita['file_upload'] ?>" class="card-img-top" alt="<?= $berita['judul'] ?>" style="height: 200px; object-fit: cover;">
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title text-primary"><?= $berita['judul'] ?></h5>
                                         <p class="card-text flex-grow-1"><?= substr($berita['isi_berita'], 0, 100) ?>...</p>

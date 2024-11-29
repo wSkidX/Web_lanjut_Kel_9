@@ -6,7 +6,7 @@ if ($_GET['proses'] == 'insert') {
         try {
             $sql = "INSERT INTO dosen (nik, nama_dosen, email, prodi_id, notelp, alamat) 
                     VALUES (?, ?, ?, ?, ?, ?)";
-            $stmt = $dbh->prepare($sql);
+            $stmt = $db->prepare($sql);
             $result = $stmt->execute([
                 $_POST['nik'],
                 $_POST['nama_dosen'],
@@ -29,7 +29,7 @@ if ($_GET['proses'] == 'insert') {
 
 if ($_GET['proses'] == 'delete') {
     try {
-        $stmt = $dbh->prepare("DELETE FROM dosen WHERE id = ?");
+        $stmt = $db->prepare("DELETE FROM dosen WHERE id = ?");
         $hapus = $stmt->execute([$_GET['id']]);
         
         if ($hapus) {
@@ -53,7 +53,7 @@ if ($_GET['proses'] == 'edit') {
                     alamat = ? 
                     WHERE id = ?";
             
-            $stmt = $dbh->prepare($sql);
+            $stmt = $db->prepare($sql);
             $result = $stmt->execute([
                 $_POST['nik'],
                 $_POST['nama_dosen'],

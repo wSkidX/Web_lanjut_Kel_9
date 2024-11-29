@@ -1,4 +1,8 @@
 <?php
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
 include '../backend/koneksi.php';
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'list';
 switch ($aksi) {

@@ -1,5 +1,10 @@
 <?php
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
 include '../backend/koneksi.php';
+
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'list';
 switch ($aksi) {
     case 'list':
@@ -37,7 +42,7 @@ switch ($aksi) {
                     <tbody>
                     <?php
                     try {
-                        $stmt = $dbh->query("SELECT dosen.*, prodi.nama_prodi 
+                        $stmt = $db->query("SELECT dosen.*, prodi.nama_prodi 
                                             FROM dosen 
                                             JOIN prodi ON prodi.id = dosen.prodi_id");
                         $no = 1;
@@ -118,7 +123,7 @@ switch ($aksi) {
                             <option value="">-Pilih Prodi-</option>
                             <?php
                             try {
-                                $stmt = $dbh->query("SELECT * FROM prodi");
+                                $stmt = $db->query("SELECT * FROM prodi");
                                 while ($data_prodi = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     echo "<option value='" . $data_prodi['id'] . "'>" . 
                                          htmlspecialchars($data_prodi['nama_prodi']) . "</option>";
@@ -151,7 +156,7 @@ switch ($aksi) {
 
     case 'edit':
         try {
-            $stmt = $dbh->prepare("SELECT * FROM dosen WHERE id = ?");
+            $stmt = $db->prepare("SELECT * FROM dosen WHERE id = ?");
             $stmt->execute([$_GET['id']]);
             $data_dosen = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
@@ -188,7 +193,7 @@ switch ($aksi) {
                             <option value="">-Pilih Prodi-</option>
                             <?php
                             try {
-                                $stmt = $dbh->query("SELECT * FROM prodi");
+                                $stmt = $db->query("SELECT * FROM prodi");
                                 while ($data_prodi = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     $selected = ($data_prodi['id'] == $data_dosen['prodi_id']) ? 'selected' : '';
                                     echo "<option value='" . $data_prodi['id'] . "' $selected>" . 
