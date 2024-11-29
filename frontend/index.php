@@ -1,40 +1,36 @@
 <?php
-session_start();
-if (!isset($_SESSION['email'])) {
-    header('location:../login.php');
-    exit;
-}
-include '../backend/koneksi.php'; 
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
+include '../backend/koneksi.php';
 
 try {
-    $email = $_SESSION['email'];
-    $stmt = $db->prepare("SELECT id, nama, email, password, level_id, foto, no_telp, alamat FROM user WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $_SESSION['user'];
+    $stmt = $db->prepare("SELECT user.*, level.nama_level 
+                         FROM user 
+                         JOIN level ON level.id = user.level_id 
+                         WHERE user.id = ?");
+    $stmt->execute([$user['id']]);
+    $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
+    if ($user_data) {
+        // Update session dengan data terbaru
         $_SESSION['user'] = [
-            'id' => $user['id'],
-            'nama' => $user['nama'],
-            'email' => $user['email'],
-            'level_id' => $user['level_id'],
-            'foto' => $user['foto'],
-            'no_telp' => $user['no_telp'],
-            'alamat' => $user['alamat']
+            'id' => $user_data['id'],
+            'nama' => $user_data['nama'],
+            'email' => $user_data['email'],
+            'level_id' => $user_data['level_id'],
+            'foto' => $user_data['foto'],
+            'level' => $user_data['nama_level']
         ];
     } else {
-        session_destroy();
-        header('location:../login.php');
+        // Jika user tidak ditemukan, logout
+        header('location: ../logout.php');
         exit;
     }
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
-    exit;
-}
-
-// Fungsi untuk mengecek menu aktif
-function isMenuActive($menu) {
-    return (isset($_GET['p']) && $_GET['p'] == $menu) ? 'active' : '';
+    die("Error: " . $e->getMessage());
 }
 ?>
 

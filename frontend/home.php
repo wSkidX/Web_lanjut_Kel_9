@@ -1,4 +1,8 @@
 <?php
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
+
 include '../backend/koneksi.php';
 ?>
 <div class="container-fluid mt-4">
