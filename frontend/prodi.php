@@ -6,10 +6,10 @@ switch ($aksi) {
     case 'list':
 ?>
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Manajemen Prodi</h1>
+    <h1 class="mt-4">Manajemen Program Studi</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-        <li class="breadcrumb-item active">Prodi</li>
+        <li class="breadcrumb-item active">Program Studi</li>
     </ol>
     <div class="card mb-4">
         <div class="card-header">
@@ -19,14 +19,14 @@ switch ($aksi) {
         <div class="card-body">
             <div class="mb-3">
                 <a href="index.php?p=prodi&aksi=input" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Tambah Prodi
+                    <i class="fas fa-plus"></i> Tambah Program Studi
                 </a>
             </div>
             <table id="tabelProdi" class="table table-striped table-bordered">
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Nama Prodi</th>
+                        <th>Nama Program Studi</th>
                         <th>Jenjang</th>
                         <th>Aksi</th>
                     </tr>
@@ -34,20 +34,21 @@ switch ($aksi) {
                 <tbody>
                 <?php
                 try {
-                    $stmt = $dbh->query("SELECT * FROM prodi");
+                    $stmt = $db->query("SELECT * FROM prodi");
                     $no = 1;
-                    while($data = $stmt->fetch(PDO::FETCH_ASSOC)){
+                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 ?>
                     <tr>
                         <td><?= $no++ ?></td>
-                        <td><?= htmlspecialchars($data['nama_prodi']) ?></td>
-                        <td><?= htmlspecialchars($data['jenjang_prodi']) ?></td>
+                        <td><?= $row['nama_prodi'] ?></td>
+                        <td><?= $row['jenjang'] ?></td>
                         <td>
-                            <a href="index.php?p=prodi&aksi=edit&id=<?= $data['id'] ?>" class="btn btn-warning btn-sm">
+                            <a href="index.php?p=prodi&aksi=edit&id=<?= $row['id'] ?>" 
+                               class="btn btn-warning btn-sm">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <a href="../backend/prosesProdi.php?proses=delete&id=<?= $data['id'] ?>" 
-                               class="btn btn-danger btn-sm" 
+                            <a href="../backend/prosesProdi.php?proses=delete&id=<?= $row['id'] ?>" 
+                               class="btn btn-danger btn-sm"
                                onclick="return confirm('Yakin ingin menghapus data ini?')">
                                 <i class="fas fa-trash"></i> Hapus
                             </a>
@@ -71,11 +72,11 @@ switch ($aksi) {
     case 'input':    
 ?>
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Tambah Prodi</h1>
+    <h1 class="mt-4">Tambah Program Studi</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="index.php?p=prodi">Prodi</a></li>
-        <li class="breadcrumb-item active">Tambah Prodi</li>
+        <li class="breadcrumb-item"><a href="index.php?p=prodi">Program Studi</a></li>
+        <li class="breadcrumb-item active">Tambah Program Studi</li>
     </ol>
     <div class="card mb-4">
         <div class="card-header">
@@ -85,7 +86,7 @@ switch ($aksi) {
         <div class="card-body">
             <form action="../backend/prosesProdi.php?proses=insert" method="post">
                 <div class="mb-3">
-                    <label class="form-label">Nama Prodi</label>
+                    <label class="form-label">Nama Program Studi</label>
                     <input type="text" class="form-control" name="nama_prodi" required>
                 </div>
                 

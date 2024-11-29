@@ -51,15 +51,22 @@ switch ($aksi) {
                             <td><?= htmlspecialchars($data['nama_prodi']) ?></td>
                             <td><?= htmlspecialchars($data['notelp']) ?></td>
                             <td><?= htmlspecialchars($data['alamat']) ?></td>
-                            <td>
-                                <a href="index.php?p=dosen&aksi=edit&id=<?= $data['id'] ?>" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="../backend/prosesDosen.php?proses=delete&id=<?= $data['id'] ?>" 
-                                   class="btn btn-danger btn-sm" 
-                                   onclick="return confirm('Yakin ingin menghapus data ini?')">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </a>
+                            <td class="text-center" style="white-space: nowrap;">
+                                <div class="btn-group" role="group">
+                                    <a href="index.php?p=dosen&aksi=edit&id=<?= $data['id'] ?>" 
+                                       class="btn btn-warning btn-sm me-1" 
+                                       data-bs-toggle="tooltip" 
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="../backend/prosesDosen.php?proses=delete&id=<?= $data['id'] ?>" 
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Yakin ingin menghapus data ini?')"
+                                       data-bs-toggle="tooltip" 
+                                       title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php
@@ -224,6 +231,12 @@ switch ($aksi) {
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/id.json"
             }
+        });
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
         });
     });
 </script>

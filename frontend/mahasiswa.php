@@ -40,7 +40,7 @@ switch ($aksi) {
                     <tbody>
                     <?php
                     try {
-                        $stmt = $dbh->query("SELECT mahasiswa.*, prodi.nama_prodi 
+                        $stmt = $db->query("SELECT mahasiswa.*, prodi.nama_prodi 
                                            FROM mahasiswa 
                                            JOIN prodi ON prodi.id = mahasiswa.prodi_id");
                         $no = 1;
@@ -49,23 +49,30 @@ switch ($aksi) {
                         <tr>
                             <td><?= $no++ ?></td>
                             <td><?= $data['nim'] ?></td>
-                            <td><?= $data['nama_mhs'] ?></td>
+                            <td><?= $data['nama'] ?></td>
                             <td><?= $data['tgl_lahir'] ?></td>
-                            <td><?= $data['jekel'] ?></td>
+                            <td><?= $data['jenis_kelamin'] ?></td>
                             <td><?= $data['hobi'] ?></td>
                             <td><?= $data['email'] ?></td>
-                            <td><?= $data['notelp'] ?></td>
+                            <td><?= $data['no_telp'] ?></td>
                             <td><?= $data['alamat'] ?></td>
                             <td><?= $data['nama_prodi'] ?></td>
-                            <td>
-                                <a href="index.php?p=mhs&aksi=edit&nim=<?= $data['nim'] ?>" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="../backend/prosesMahasiswa.php?proses=delete&nim=<?= $data['nim'] ?>" 
-                                   class="btn btn-danger btn-sm" 
-                                   onclick="return confirm('Yakin ingin menghapus data ini?')">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </a>
+                            <td class="text-center" style="white-space: nowrap;">
+                                <div class="btn-group" role="group">
+                                    <a href="index.php?p=mhs&aksi=edit&nim=<?= $data['nim'] ?>" 
+                                       class="btn btn-warning btn-sm me-1" 
+                                       data-bs-toggle="tooltip" 
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="../backend/prosesMahasiswa.php?proses=delete&nim=<?= $data['nim'] ?>" 
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Yakin ingin menghapus data ini?')"
+                                       data-bs-toggle="tooltip" 
+                                       title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php
@@ -101,41 +108,20 @@ switch ($aksi) {
                 <form action="../backend/prosesMahasiswa.php?proses=insert" method="post">
                     <div class="mb-3">
                         <label class="form-label">NIM</label>
-                        <input type="text" class="form-control" name="nim" required>
+                        <input type="text" class="form-control" name="nim" maxlength="20" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Nama Mahasiswa</label>
-                        <input type="text" class="form-control" name="nama" required>
+                        <label class="form-label">Nama</label>
+                        <input type="text" class="form-control" name="nama" maxlength="100" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Tanggal Lahir</label>
-                        <div class="row">
-                            <div class="col">
-                                <select name="tgl" class="form-select" required>
-                                    <?php for($i=1; $i<=31; $i++) { ?>
-                                        <option value="<?= sprintf("%02d", $i) ?>"><?= $i ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <select name="bln" class="form-select" required>
-                                    <?php for($i=1; $i<=12; $i++) { ?>
-                                        <option value="<?= sprintf("%02d", $i) ?>"><?= $i ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <select name="thn" class="form-select" required>
-                                    <?php for($i=date('Y')-30; $i<=date('Y'); $i++) { ?>
-                                        <option value="<?= $i ?>"><?= $i ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                        </div>
+                        <input type="date" class="form-control" name="tgl_lahir" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Jenis Kelamin</label>
-                        <select name="jekel" class="form-select" required>
+                        <select name="jenis_kelamin" class="form-select" required>
+                            <option value="">-Pilih Jenis Kelamin-</option>
                             <option value="L">Laki-laki</option>
                             <option value="P">Perempuan</option>
                         </select>
@@ -159,26 +145,26 @@ switch ($aksi) {
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" required>
+                        <input type="email" class="form-control" name="email" maxlength="100" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">No Telp</label>
-                        <input type="text" class="form-control" name="notelp" required>
+                        <input type="text" class="form-control" name="no_telp" maxlength="20" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Alamat</label>
                         <textarea class="form-control" name="alamat" rows="3" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Prodi</label>
+                        <label class="form-label">Program Studi</label>
                         <select name="prodi_id" class="form-select" required>
-                            <option value="">-Pilih Prodi-</option>
+                            <option value="">-Pilih Program Studi-</option>
                             <?php
                             try {
-                                $stmt = $dbh->query("SELECT * FROM prodi");
+                                $stmt = $db->query("SELECT * FROM prodi ORDER BY nama_prodi");
                                 while ($data_prodi = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     echo "<option value='" . $data_prodi['id'] . "'>" . 
-                                         $data_prodi['nama_prodi'] . "</option>";
+                                         htmlspecialchars($data_prodi['nama_prodi']) . "</option>";
                                 }
                             } catch(PDOException $e) {
                                 echo "Error: " . $e->getMessage();
@@ -188,11 +174,11 @@ switch ($aksi) {
                     </div>
                     <div class="mb-3">
                         <button type="submit" class="btn btn-primary" name="submit">
-                            <i class="fas fa-save"></i> Submit
+                            <i class="fas fa-save"></i> Simpan
                         </button>
-                        <button type="reset" class="btn btn-secondary" name="reset">
-                            <i class="fas fa-undo"></i> Reset
-                        </button>
+                        <a href="index.php?p=mhs" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
                     </div>
                 </form>
             </div>
@@ -204,7 +190,7 @@ switch ($aksi) {
 
     case 'edit':
         try {
-            $stmt = $dbh->prepare("SELECT * FROM mahasiswa WHERE nim = ?");
+            $stmt = $db->prepare("SELECT * FROM mahasiswa WHERE nim = ?");
             $stmt->execute([$_GET['nim']]);
             $data_mhs = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -226,52 +212,24 @@ switch ($aksi) {
             </div>
             <div class="card-body">
                 <form action="../backend/prosesMahasiswa.php?proses=edit" method="post">
-                    <input type="hidden" name="nim" value="<?= $data_mhs['nim'] ?>">
+                    <input type="hidden" name="nim" value="<?= htmlspecialchars($data_mhs['nim']) ?>">
                     <div class="mb-3">
                         <label class="form-label">NIM</label>
-                        <input type="text" class="form-control" value="<?= $data_mhs['nim'] ?>" disabled>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($data_mhs['nim']) ?>" disabled>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Nama Mahasiswa</label>
-                        <input type="text" class="form-control" name="nama" value="<?= $data_mhs['nama_mhs'] ?>" required>
+                        <label class="form-label">Nama</label>
+                        <input type="text" class="form-control" name="nama" value="<?= htmlspecialchars($data_mhs['nama']) ?>" maxlength="100" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Tanggal Lahir</label>
-                        <div class="row">
-                            <div class="col">
-                                <select name="tgl" class="form-select" required>
-                                    <?php for($i=1; $i<=31; $i++) { 
-                                        $selected = ($i == intval($tgl_lahir[2])) ? 'selected' : '';
-                                    ?>
-                                        <option value="<?= sprintf("%02d", $i) ?>" <?= $selected ?>><?= $i ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <select name="bln" class="form-select" required>
-                                    <?php for($i=1; $i<=12; $i++) { 
-                                        $selected = ($i == intval($tgl_lahir[1])) ? 'selected' : '';
-                                    ?>
-                                        <option value="<?= sprintf("%02d", $i) ?>" <?= $selected ?>><?= $i ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <select name="thn" class="form-select" required>
-                                    <?php for($i=date('Y')-30; $i<=date('Y'); $i++) { 
-                                        $selected = ($i == intval($tgl_lahir[0])) ? 'selected' : '';
-                                    ?>
-                                        <option value="<?= $i ?>" <?= $selected ?>><?= $i ?></option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-                        </div>
+                        <input type="date" class="form-control" name="tgl_lahir" value="<?= htmlspecialchars($data_mhs['tgl_lahir']) ?>" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Jenis Kelamin</label>
-                        <select name="jekel" class="form-select" required>
-                            <option value="L" <?= ($data_mhs['jekel'] == 'L') ? 'selected' : '' ?>>Laki-laki</option>
-                            <option value="P" <?= ($data_mhs['jekel'] == 'P') ? 'selected' : '' ?>>Perempuan</option>
+                        <select name="jenis_kelamin" class="form-select" required>
+                            <option value="L" <?= ($data_mhs['jenis_kelamin'] == 'L') ? 'selected' : '' ?>>Laki-laki</option>
+                            <option value="P" <?= ($data_mhs['jenis_kelamin'] == 'P') ? 'selected' : '' ?>>Perempuan</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -300,7 +258,7 @@ switch ($aksi) {
                     </div>
                     <div class="mb-3">
                         <label class="form-label">No Telp</label>
-                        <input type="text" class="form-control" name="notelp" value="<?= $data_mhs['notelp'] ?>" required>
+                        <input type="text" class="form-control" name="no_telp" value="<?= $data_mhs['no_telp'] ?>" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Alamat</label>
@@ -312,7 +270,7 @@ switch ($aksi) {
                             <option value="">-Pilih Prodi-</option>
                             <?php
                             try {
-                                $stmt = $dbh->query("SELECT * FROM prodi");
+                                $stmt = $db->query("SELECT * FROM prodi");
                                 while ($data_prodi = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     $selected = ($data_prodi['id'] == $data_mhs['prodi_id']) ? 'selected' : '';
                                     echo "<option value='" . $data_prodi['id'] . "' $selected>" . 
@@ -351,6 +309,12 @@ switch ($aksi) {
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/id.json"
             }
+        });
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
         });
     });
 </script>

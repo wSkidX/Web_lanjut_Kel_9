@@ -164,6 +164,12 @@ switch ($aksi) {
                 "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/id.json"
             }
         });
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
     });
 </script>
         

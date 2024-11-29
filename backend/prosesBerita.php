@@ -1,15 +1,16 @@
 <?php
+session_start();
 include 'koneksi.php';
 
 try {
     if ($_GET['proses'] == 'insert') {
         // Handle file upload
-        $photo = '';
+        $file_upload = '';
         if (isset($_FILES['fileToUpload']) && $_FILES['fileToUpload']['error'] == 0) {
-            $target_dir = "upload/";
+            $target_dir = "uploads/";
             $file = basename($_FILES["fileToUpload"]["name"]);
-            $photo = time() . "_" . $file;
-            $target_file = $target_dir . $photo;
+            $file_upload = time() . "_" . $file;
+            $target_file = $target_dir . $file_upload;
             
             // Validasi tipe file
             $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
@@ -27,90 +28,101 @@ try {
             }
         }
 
-        $query = "INSERT INTO berita (judul, kategori_id, file_upload, isi_berita, user_id) 
-                 VALUES (:judul, :kategori_id, :file_upload, :isi_berita, :user_id)";
-        $stmt = $db->prepare($query);
+        $stmt = $db->prepare("INSERT INTO berita (user_id, kategori_id, judul, file_upload, isi_berita, created_at) 
+                             VALUES (?, ?, ?, ?, ?, NOW())");
         
-        $stmt->bindParam(':judul', $_POST['judul']);
-        $stmt->bindParam(':kategori_id', $_POST['kategori_id']);
-        $stmt->bindParam(':file_upload', $photo);
-        $stmt->bindParam(':isi_berita', $_POST['isi_berita']);
-        $stmt->bindParam(':user_id', $_SESSION['user_id']);
-        
-        $result = $stmt->execute();
+        $result = $stmt->execute([
+            $_SESSION['user']['id'],
+            $_POST['kategori_id'],
+            $_POST['judul'],
+            $file_upload,
+            $_POST['isi_berita']
+        ]);
         
         if ($result) {
-            header('Location: index.php?p=berita');
+            header('Location: ../frontend/index.php?p=berita');
+            exit;
         }
     } 
+    
     else if ($_GET['proses'] == 'edit') {
-        $id = $_POST['id'];
+        $file_upload = '';
+        $params = [
+            $_POST['judul'],
+            $_POST['kategori_id'],
+            $_POST['isi_berita'],
+            $_POST['id']
+        ];
         
         // Jika ada file baru yang diupload
         if (!empty($_FILES['fileToUpload']['name'])) {
-            $target_dir = "upload/";
-            $file = $_FILES['fileToUpload']['name'];
-            $path = pathinfo($file);
-            $filename = $path['filename'];
-            $ext = $path['extension'];
+            $target_dir = "uploads/";
+            $file = basename($_FILES["fileToUpload"]["name"]);
+            $file_upload = time() . "_" . $file;
+            $target_file = $target_dir . $file_upload;
             
-            $newFileName = time() . "_" . $file;
-            $path_filename_ext = $target_dir . $newFileName;
+            // Validasi dan upload file
+            $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+            if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg") {
+                throw new Exception("Hanya file JPG, JPEG & PNG yang diizinkan");
+            }
             
-            move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $path_filename_ext);
+            if ($_FILES["fileToUpload"]["size"] > 5000000) {
+                throw new Exception("File terlalu besar (max 5MB)");
+            }
             
-            $query = "UPDATE berita SET 
-                     judul = :judul,
-                     kategori_id = :kategori_id,
-                     file_upload = :file_upload,
-                     isi_berita = :isi_berita 
-                     WHERE id = :id";
-            
-            $stmt = $db->prepare($query);
-            $stmt->bindParam(':file_upload', $newFileName);
+            if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+                // Hapus file lama jika ada
+                if (!empty($_POST['old_file'])) {
+                    $old_file = "uploads/" . $_POST['old_file'];
+                    if (file_exists($old_file)) {
+                        unlink($old_file);
+                    }
+                }
+                
+                $stmt = $db->prepare("UPDATE berita SET 
+                                    judul = ?, 
+                                    kategori_id = ?, 
+                                    file_upload = ?,
+                                    isi_berita = ? 
+                                    WHERE id = ?");
+                array_splice($params, 3, 0, $file_upload);
+            }
         } else {
-            $query = "UPDATE berita SET 
-                     judul = :judul,
-                     kategori_id = :kategori_id,
-                     isi_berita = :isi_berita 
-                     WHERE id = :id";
-            
-            $stmt = $db->prepare($query);
+            $stmt = $db->prepare("UPDATE berita SET 
+                                judul = ?, 
+                                kategori_id = ?, 
+                                isi_berita = ? 
+                                WHERE id = ?");
         }
         
-        $stmt->bindParam(':judul', $_POST['judul']);
-        $stmt->bindParam(':kategori_id', $_POST['kategori_id']);
-        $stmt->bindParam(':isi_berita', $_POST['isi_berita']);
-        $stmt->bindParam(':id', $id);
-        
-        $result = $stmt->execute();
+        $result = $stmt->execute($params);
         
         if ($result) {
-            header('Location: index.php?p=berita');
+            header('Location: ../frontend/index.php?p=berita');
+            exit;
         }
     } 
+    
     else if ($_GET['proses'] == 'delete') {
-        $id = $_GET['id'];
-        $file = $_GET['file'];
-        
         // Hapus file fisik
-        if (!empty($file)) {
-            $file_path = "upload/" . $file;
+        if (!empty($_GET['file'])) {
+            $file_path = "uploads/" . $_GET['file'];
             if (file_exists($file_path)) {
                 unlink($file_path);
             }
         }
         
         // Hapus record dari database
-        $query = "DELETE FROM berita WHERE id = :id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $result = $stmt->execute();
+        $stmt = $db->prepare("DELETE FROM berita WHERE id = ?");
+        $result = $stmt->execute([$_GET['id']]);
         
         if ($result) {
-            header('Location: index.php?p=berita');
+            header('Location: ../frontend/index.php?p=berita');
+            exit;
         }
     }
+
 } catch(PDOException $e) {
     echo "Database Error: " . $e->getMessage();
 } catch(Exception $e) {
