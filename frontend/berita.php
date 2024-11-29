@@ -81,6 +81,16 @@ switch ($aksi) {
                                 <td><?= htmlspecialchars($data['nama_kategori']) ?></td>
                                 <td><?= htmlspecialchars($data['penulis']) ?></td>
                                 <td><?= date('d/m/Y H:i', strtotime($data['created_at'])) ?></td>
+                                <td class="text-center">
+                                    <?php if(!empty($data['file_upload'])): ?>
+                                        <img src="../backend/uploads/<?= htmlspecialchars($data['file_upload']) ?>" 
+                                             alt="<?= htmlspecialchars($data['judul']) ?>"
+                                             class="img-thumbnail"
+                                             style="max-width: 100px; height: auto;">
+                                    <?php else: ?>
+                                        <span class="text-muted">No Image</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="text-center" style="white-space: nowrap;">
                                     <div class="btn-group" role="group">
                                         <?php if($user_level['nama_level'] == 'admin' || $_SESSION['user']['id'] == $data['user_id']): ?>
@@ -248,9 +258,12 @@ switch ($aksi) {
                         <label class="form-label">File Upload</label>
                         <input type="file" class="form-control" name="fileToUpload" id="file-upload" accept="image/*">
                         <div id="preview-container" class="mt-2">
-                            <?php if($data_berita['file_upload']): ?>
-                                <img src="../backend/uploads/<?= $data_berita['file_upload'] ?>" 
-                                     alt="Current Image" id="file-preview" style="max-width: 300px;">
+                            <?php if(!empty($data_berita['file_upload'])): ?>
+                                <img src="../backend/uploads/<?= htmlspecialchars($data_berita['file_upload']) ?>" 
+                                     alt="Current Image" 
+                                     id="file-preview" 
+                                     class="img-thumbnail"
+                                     style="max-width: 300px;">
                             <?php else: ?>
                                 <img src="#" alt="Preview" id="file-preview" style="max-width: 300px; display: none;">
                             <?php endif; ?>

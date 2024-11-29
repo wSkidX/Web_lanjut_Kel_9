@@ -1,4 +1,7 @@
 <?php
+require_once '../backend/session_check.php';
+checkSession();
+checkSessionTimeout();
 
 if (!isset($_SESSION['email'])) {
     header('location:../login.php');
@@ -126,65 +129,103 @@ try {
         <?php if($error != ''): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <?= htmlspecialchars($error) ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
+        
         <?php if($success != ''): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?= htmlspecialchars($success) ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
+
         <div class="row">
-            <div class="col-md-6">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Informasi Akun</h3>
-                    </div>
-                    <form method="post" enctype="multipart/form-data">
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="nama">Nama</label>
-                                <input type="text" class="form-control" id="nama" name="nama" 
-                                       value="<?= htmlspecialchars($user['nama']) ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo $user['email']; ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="current_password">Password Lama</label>
-                                <input type="password" class="form-control" id="current_password" name="current_password">
-                            </div>
-                            <div class="form-group">
-                                <label for="new_password">Password Baru</label>
-                                <input type="password" class="form-control" id="new_password" name="new_password">
-                            </div>
-                            <div class="form-group">
-                                <label for="confirm_password">Konfirmasi Password Baru</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
-                            </div>
-                            <div class="form-group">
-                                <label for="foto">Foto Profil</label>
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="foto" name="foto" onchange="previewImage(this);">
-                                        <label class="custom-file-label" for="foto">Pilih file</label>
+            <!-- Kolom Foto Profil -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <img src="<?= !empty($user['foto']) ? $user['foto'] : '../asset/user.png' ?>" 
+                             class="rounded-circle mb-3" 
+                             alt="Foto Profil"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                        <h5 class="card-title"><?= htmlspecialchars($user['nama']) ?></h5>
+                        <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
+                        
+                        <form method="post" enctype="multipart/form-data" id="foto-form">
+                            <div class="mb-3">
+                                <label for="foto" class="form-label d-block">
+                                    <div class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-camera me-2"></i>Ubah Foto
                                     </div>
+                                </label>
+                                <input type="file" class="form-control d-none" id="foto" name="foto" 
+                                       accept="image/*" onchange="previewImage(this);">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom Form -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nama Lengkap</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" name="nama" 
+                                           value="<?= htmlspecialchars($user['nama']) ?>">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <img id="preview" src="#" alt="Preview" class="img-thumbnail" style="max-width: 200px; display: none;">
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" name="email" 
+                                           value="<?= htmlspecialchars($user['email']) ?>">
+                                </div>
                             </div>
-                        </div>
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                        </div>
-                    </form>
+
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <h5>Ubah Password</h5>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Password Lama</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" name="current_password">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Password Baru</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    <input type="password" class="form-control" name="new_password">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Konfirmasi Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-check"></i></span>
+                                    <input type="password" class="form-control" name="confirm_password">
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -193,20 +234,21 @@ try {
 
 <script>
 function previewImage(input) {
-    var preview = document.getElementById('preview');
-    var file = input.files[0];
-    var reader = new FileReader();
-
-    reader.onloadend = function () {
-        preview.src = reader.result;
-        preview.style.display = 'block';
-    }
-
-    if (file) {
-        reader.readAsDataURL(file);
-    } else {
-        preview.src = '';
-        preview.style.display = 'none';
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('img.rounded-circle').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+        // Auto submit form when file selected
+        document.getElementById('foto-form').submit();
     }
 }
+
+// Show filename in custom file input
+document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+    const fileName = e.target.files[0].name;
+    const nextSibling = e.target.nextElementSibling;
+    nextSibling.innerText = fileName;
+});
 </script>

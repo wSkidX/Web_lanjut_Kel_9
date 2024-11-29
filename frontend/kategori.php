@@ -37,7 +37,7 @@ switch ($aksi) {
                     <tbody>
                     <?php
                     try {
-                        $stmt = $dbh->query("SELECT * FROM kategori");
+                        $stmt = $db->query("SELECT * FROM kategori");
                         $no = 1;
                         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     ?>

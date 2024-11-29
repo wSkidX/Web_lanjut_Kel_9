@@ -6,7 +6,7 @@ if ($_GET['proses'] == 'insert') {
         try {
             $sql = "INSERT INTO kategori (nama_kategori, keterangan) 
                     VALUES (?, ?)";
-            $stmt = $dbh->prepare($sql);
+            $stmt = $db->prepare($sql);
             $result = $stmt->execute([
                 $_POST['nama_kategori'],
                 $_POST['keterangan']
@@ -25,7 +25,7 @@ if ($_GET['proses'] == 'insert') {
 
 if ($_GET['proses'] == 'delete') {
     try {
-        $stmt = $dbh->prepare("DELETE FROM kategori WHERE id = ?");
+        $stmt = $db->prepare("DELETE FROM kategori WHERE id = ?");
         $hapus = $stmt->execute([$_GET['id']]);
         
         if ($hapus) {
@@ -45,7 +45,7 @@ if ($_GET['proses'] == 'edit') {
                     keterangan = ? 
                     WHERE id = ?";
             
-            $stmt = $dbh->prepare($sql);
+            $stmt = $db->prepare($sql);
             $result = $stmt->execute([
                 $_POST['nama_kategori'],
                 $_POST['keterangan'],
