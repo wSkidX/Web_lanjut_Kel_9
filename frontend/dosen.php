@@ -1,5 +1,5 @@
 <?php
-include 'backend/koneksi.php';
+include '../backend/koneksi.php';
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : 'list';
 switch ($aksi) {
     case 'list':

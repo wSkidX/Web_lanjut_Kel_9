@@ -296,7 +296,7 @@
             if ($page == 'home') include 'home.php';
             if ($page == 'mhs') include 'mahasiswa.php';
             if ($page == 'prodi') include 'prodi.php';
-            if ($page == 'dosen') include 'frontend/dosen.php';
+            if ($page == 'dosen') include 'dosen.php';
             if ($page == 'kategori') include 'kategori.php';
             if ($page == 'berita') include 'berita.php';
             if ($page == 'detail') include 'detail.php';
@@ -327,4 +327,3 @@
 </body>
 
 </html>
-

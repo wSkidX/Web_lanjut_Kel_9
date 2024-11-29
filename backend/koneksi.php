@@ -5,3 +5,4 @@ try{
     print"Koneksi atau query bermasalah: ".$e->getMessage()."<br/>";
     die();
 }
+?>
