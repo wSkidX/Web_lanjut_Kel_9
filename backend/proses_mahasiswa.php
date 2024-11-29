@@ -1,75 +1,93 @@
 <?php
-require_once 'koneksi.php';
+include 'koneksi.php';
 
-try {
-    if ($_GET['proses'] == 'insert') {
-        $tgl = $_POST['thn'] . '-' . $_POST['bln'] . '-' . $_POST['tgl'];
-        $hobies = implode(",", $_POST['hobi']);
-        
-        $sql = "INSERT INTO mahasiswa (nim, nama_mhs, tgl_lahir, jekel, hobi, email, notelp, alamat, prodi_id) 
-                VALUES (:nim, :nama, :tgl, :jekel, :hobi, :email, :notelp, :alamat, :prodi_id)";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':nim', $_POST['nim']);
-        $stmt->bindParam(':nama', $_POST['nama']);
-        $stmt->bindParam(':tgl', $tgl);
-        $stmt->bindParam(':jekel', $_POST['jekel']);
-        $stmt->bindParam(':hobi', $hobies);
-        $stmt->bindParam(':email', $_POST['email']);
-        $stmt->bindParam(':notelp', $_POST['notelp']);
-        $stmt->bindParam(':alamat', $_POST['alamat']);
-        $stmt->bindParam(':prodi_id', $_POST['prodi_id']);
-        
-        if ($stmt->execute()) {
-            header('Location: index.php?p=mhs');
-            exit;
+if ($_GET['proses'] == 'insert') {
+    if (isset($_POST['submit'])) {
+        try {
+            // Format tanggal
+            $tgl = $_POST['thn'] . '-' . $_POST['bln'] . '-' . $_POST['tgl'];
+            // Gabungkan array hobi
+            $hobies = isset($_POST['hobi']) ? implode(",", $_POST['hobi']) : '';
+            
+            $sql = "INSERT INTO mahasiswa (nim, nama_mhs, tgl_lahir, jekel, hobi, email, notelp, alamat, prodi_id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $dbh->prepare($sql);
+            $result = $stmt->execute([
+                $_POST['nim'],
+                $_POST['nama'],
+                $tgl,
+                $_POST['jekel'],
+                $hobies,
+                $_POST['email'],
+                $_POST['notelp'],
+                $_POST['alamat'],
+                $_POST['prodi_id']
+            ]);
+
+            if ($result) {
+                echo "<script>alert('Data Berhasil Ditambahkan'); 
+                      window.location.href='../index.php?p=mhs';</script>";
+            }
+        } catch(PDOException $e) {
+            echo "<script>alert('Data Gagal Ditambahkan'); 
+                  window.location.href='../index.php?p=mhs&aksi=input';</script>";
         }
     }
+}
 
-    if ($_GET['proses'] == 'edit') {
-        $tgl = $_POST['thn'] . '-' . $_POST['bln'] . '-' . $_POST['tgl'];
-        $hobies = implode(",", $_POST['hobi']);
+if ($_GET['proses'] == 'delete') {
+    try {
+        $stmt = $dbh->prepare("DELETE FROM mahasiswa WHERE nim = ?");
+        $hapus = $stmt->execute([$_GET['nim']]);
         
-        $sql = "UPDATE mahasiswa SET 
-                nama_mhs = :nama,
-                tgl_lahir = :tgl,
-                jekel = :jekel,
-                hobi = :hobi,
-                email = :email,
-                notelp = :notelp,
-                alamat = :alamat,
-                prodi_id = :prodi_id 
-                WHERE nim = :nim";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':nim', $_POST['nim']);
-        $stmt->bindParam(':nama', $_POST['nama']);
-        $stmt->bindParam(':tgl', $tgl);
-        $stmt->bindParam(':jekel', $_POST['jekel']);
-        $stmt->bindParam(':hobi', $hobies);
-        $stmt->bindParam(':email', $_POST['email']);
-        $stmt->bindParam(':notelp', $_POST['notelp']);
-        $stmt->bindParam(':alamat', $_POST['alamat']);
-        $stmt->bindParam(':prodi_id', $_POST['prodi_id']);
-        
-        if ($stmt->execute()) {
-            header('Location: index.php?p=mhs');
-            exit;
+        if ($hapus) {
+            header("Location: ../index.php?p=mhs");
+        }
+    } catch(PDOException $e) {
+        echo "<script>alert('Data Gagal Dihapus'); 
+              window.location.href='../index.php?p=mhs';</script>";
+    }
+}
+
+if ($_GET['proses'] == 'edit') {
+    if (isset($_POST['submit'])) {
+        try {
+            // Format tanggal
+            $tgl = $_POST['thn'] . '-' . $_POST['bln'] . '-' . $_POST['tgl'];
+            // Gabungkan array hobi
+            $hobies = isset($_POST['hobi']) ? implode(",", $_POST['hobi']) : '';
+            
+            $sql = "UPDATE mahasiswa SET 
+                    nama_mhs = ?, 
+                    tgl_lahir = ?, 
+                    jekel = ?, 
+                    hobi = ?, 
+                    email = ?, 
+                    notelp = ?, 
+                    alamat = ?, 
+                    prodi_id = ? 
+                    WHERE nim = ?";
+            
+            $stmt = $dbh->prepare($sql);
+            $result = $stmt->execute([
+                $_POST['nama'],
+                $tgl,
+                $_POST['jekel'],
+                $hobies,
+                $_POST['email'],
+                $_POST['notelp'],
+                $_POST['alamat'],
+                $_POST['prodi_id'],
+                $_POST['nim']
+            ]);
+
+            if ($result) {
+                echo "<script>window.location.href='../index.php?p=mhs'</script>";
+            }
+        } catch(PDOException $e) {
+            echo "<script>alert('Data Gagal Diperbarui'); 
+                  window.location.href='../index.php?p=mhs&aksi=edit&nim=".$_POST['nim']."';</script>";
         }
     }
-
-    if ($_GET['proses'] == 'delete') {
-        $sql = "DELETE FROM mahasiswa WHERE nim = :nim";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':nim', $_GET['nim']);
-        
-        if ($stmt->execute()) {
-            header('Location: index.php?p=mhs');
-            exit;
-        }
-    }
-
-} catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
 }
 ?>
