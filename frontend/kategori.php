@@ -113,7 +113,7 @@ switch ($aksi) {
 
     case 'edit':
     try {
-        $stmt = $dbh->prepare("SELECT * FROM kategori WHERE id = ?");
+        $stmt = $db->prepare("SELECT * FROM kategori WHERE id = ?");
         $stmt->execute([$_GET['id']]);
         $data_kategori = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>

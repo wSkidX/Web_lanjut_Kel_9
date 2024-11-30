@@ -134,29 +134,24 @@ if (isset($_SESSION['success'])) {
                     $email = $_POST['email'];
                     $password = md5($_POST['password']);
 
-                    $stmt = $db->prepare("SELECT * FROM user WHERE email = ? AND password = ?");
+                    $stmt = $db->prepare("SELECT user.*, level.nama_level 
+                                         FROM user 
+                                         JOIN level ON user.level_id = level.id 
+                                         WHERE user.email = ? AND user.password = ?");
                     $stmt->execute([$email, $password]);
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($user) {
-                        // Simpan email di session
-                        $_SESSION['email'] = $user['email'];
-                        
-                        // Simpan data user di session
                         $_SESSION['user'] = [
                             'id' => $user['id'],
                             'nama' => $user['nama'],
                             'email' => $user['email'],
-                            'level_id' => $user['level_id']
+                            'level_id' => $user['level_id'],
+                            'foto' => $user['foto'],
+                            'level' => $user['nama_level']
                         ];
 
-                        // Tambahkan script loading sebelum redirect
-                        echo "<script>
-                            document.getElementById('loading-screen').style.display = 'flex';
-                            setTimeout(function() {
-                                window.location.href = 'frontend/index.php';
-                            }, 1000);
-                        </script>";
+                        header('Location: frontend/index.php');
                         exit;
                     } else {
                         $_SESSION['error'] = "Email atau Password Salah";

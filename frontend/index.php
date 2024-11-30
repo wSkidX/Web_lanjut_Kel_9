@@ -1,12 +1,14 @@
 <?php
+ob_start();
 require_once '../backend/session_check.php';
 checkSession();
 checkSessionTimeout();
 
 include '../backend/koneksi.php';
 
+$user = $_SESSION['user'];
+
 try {
-    $user = $_SESSION['user'];
     $stmt = $db->prepare("SELECT user.*, level.nama_level 
                          FROM user 
                          JOIN level ON level.id = user.level_id 
@@ -15,7 +17,6 @@ try {
     $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user_data) {
-        // Update session dengan data terbaru
         $_SESSION['user'] = [
             'id' => $user_data['id'],
             'nama' => $user_data['nama'],
@@ -24,10 +25,6 @@ try {
             'foto' => $user_data['foto'],
             'level' => $user_data['nama_level']
         ];
-    } else {
-        // Jika user tidak ditemukan, logout
-        header('location: ../logout.php');
-        exit;
     }
 } catch(PDOException $e) {
     die("Error: " . $e->getMessage());
@@ -41,14 +38,15 @@ try {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Dashboard | Teknologi Informasi</title>
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css?v=3.2.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../asset/css/style.css" rel="stylesheet">
-   
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../asset/css/style.css">
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -82,9 +80,8 @@ try {
                         </a>
                         <div class="dropdown-divider"></div>
                         <form action="../logout.php" method="POST" class="dropdown-item">
-                            <button type="submit" class="btn btn-link text-danger p-0" 
-                                    onclick="return confirm('Apakah Anda yakin ingin keluar?')">
-                                <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>
                     </div>
@@ -103,7 +100,9 @@ try {
             <div class="sidebar">
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : 'asset/default-profile.png'; ?>" class="img-circle elevation-2" alt="User Image">
+                        <img src="<?php echo !empty($user['foto']) ? $user['foto'] : '../asset/user.png'; ?>" 
+                             class="img-circle elevation-2" 
+                             alt="User Image">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block"><?php echo $user['nama']; ?></a>
@@ -286,6 +285,30 @@ try {
                             </ul>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="#" class="nav-link <?= (isset($_GET['p']) && $_GET['p']=='akun') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-user-cog"></i>
+                                <p>
+                                    Pengaturan Akun
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="index.php?p=akun" class="nav-link">
+                                        <i class="far fa-user nav-icon"></i>
+                                        <p>Profil Saya</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="index.php?p=akun&aksi=password" class="nav-link">
+                                        <i class="fas fa-key nav-icon"></i>
+                                        <p>Ubah Password</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="nav-item mt-4">
                             <div class="user-panel py-2 d-flex justify-content-center">
                                 <form action="../logout.php" method="POST" class="w-100">
@@ -330,12 +353,11 @@ try {
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.js?v=3.2.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/pages/dashboard3.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 </body>
 
 </html>
