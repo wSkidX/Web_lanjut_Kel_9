@@ -1,128 +1,106 @@
 <?php
-session_start();
 include 'koneksi.php';
 
-try {
-    if ($_GET['proses'] == 'insert') {
-        // Validasi input
-        if (empty($_POST['nim']) || empty($_POST['nama']) || empty($_POST['email'])) {
-            throw new Exception("NIM, Nama, dan Email wajib diisi!");
-        }
-
-        // Validasi email
-        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Format email tidak valid!");
-        }
-
-        // Format tanggal
-        $tgl = $_POST['thn'] . '-' . sprintf("%02d", $_POST['bln']) . '-' . sprintf("%02d", $_POST['tgl']);
-        
-        // Validasi tanggal
-        if (!strtotime($tgl)) {
-            throw new Exception("Format tanggal tidak valid!");
-        }
-
-        // Gabungkan array hobi
-        $hobies = isset($_POST['hobi']) ? implode(",", $_POST['hobi']) : '';
-
-        // Cek duplikasi NIM
-        $stmt = $db->prepare("SELECT COUNT(*) FROM mahasiswa WHERE nim = ?");
-        $stmt->execute([$_POST['nim']]);
-        if ($stmt->fetchColumn() > 0) {
-            throw new Exception("NIM sudah terdaftar!");
-        }
-        
-        $stmt = $db->prepare("INSERT INTO mahasiswa (nim, nama_mhs, tgl_lahir, jekel, hobi, email, notelp, alamat, prodi_id) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        $result = $stmt->execute([
-            trim($_POST['nim']),
-            trim($_POST['nama']),
-            $tgl,
-            $_POST['jekel'],
-            $hobies,
-            trim($_POST['email']),
-            trim($_POST['notelp']),
-            trim($_POST['alamat']),
-            $_POST['prodi_id']
-        ]);
-
-        if ($result) {
-            header('Location: ../frontend/index.php?p=mhs&status=success&message=Data berhasil ditambahkan');
-            exit;
-        }
-    } 
+if (isset($_GET['proses'])) {
+    $proses = $_GET['proses'];
     
-    else if ($_GET['proses'] == 'edit') {
-        // Validasi input
-        if (empty($_POST['nama']) || empty($_POST['email'])) {
-            throw new Exception("Nama dan Email wajib diisi!");
-        }
+    switch ($proses) {
+        case 'insert':
+            try {
+                if (isset($_POST['submit'])) {
+                    // Format tanggal
+                    $tanggal = $_POST['thn'].'-'.$_POST['bln'].'-'.$_POST['tgl'];
+                    // Format hobi
+                    $hobi = isset($_POST['hobi']) ? implode(", ", $_POST['hobi']) : '';
 
-        // Validasi email
-        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Format email tidak valid!");
-        }
+                    $stmt = $db->prepare("INSERT INTO mahasiswa (nim, nama, tgl_lahir, jenis_kelamin, hobi, email, no_telp, alamat) 
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    
+                    $stmt->execute([
+                        $_POST['nim'],
+                        $_POST['nama'],
+                        $tanggal,
+                        $_POST['jenis_kelamin'],
+                        $hobi,
+                        $_POST['email'],
+                        $_POST['no_telp'],
+                        $_POST['alamat']
+                    ]);
 
-        // Format tanggal
-        $tgl = $_POST['thn'] . '-' . sprintf("%02d", $_POST['bln']) . '-' . sprintf("%02d", $_POST['tgl']);
-        
-        // Validasi tanggal
-        if (!strtotime($tgl)) {
-            throw new Exception("Format tanggal tidak valid!");
-        }
+                    echo "<script>
+                        alert('Data Berhasil Ditambahkan');
+                        window.location.href='../frontend/index.php?p=mhs';
+                    </script>";
+                }
+            } catch(PDOException $e) {
+                echo "<script>
+                    alert('Data Gagal Ditambahkan: " . $e->getMessage() . "');
+                    window.location.href='../frontend/index.php?p=mhs&aksi=input';
+                </script>";
+            }
+            break;
 
-        // Gabungkan array hobi
-        $hobies = isset($_POST['hobi']) ? implode(",", $_POST['hobi']) : '';
-        
-        $stmt = $db->prepare("UPDATE mahasiswa SET 
-                            nama_mhs = ?, 
-                            tgl_lahir = ?, 
-                            jekel = ?, 
-                            hobi = ?, 
-                            email = ?, 
-                            notelp = ?, 
-                            alamat = ?, 
-                            prodi_id = ? 
-                            WHERE nim = ?");
-        
-        $result = $stmt->execute([
-            trim($_POST['nama']),
-            $tgl,
-            $_POST['jekel'],
-            $hobies,
-            trim($_POST['email']),
-            trim($_POST['notelp']),
-            trim($_POST['alamat']),
-            $_POST['prodi_id'],
-            $_POST['nim']
-        ]);
+        case 'edit':
+            try {
+                if (isset($_POST['submit'])) {
+                    // Format tanggal
+                    $tanggal = $_POST['thn'].'-'.$_POST['bln'].'-'.$_POST['tgl'];
+                    // Format hobi
+                    $hobi = isset($_POST['hobi']) ? implode(", ", $_POST['hobi']) : '';
 
-        if ($result) {
-            header('Location: ../frontend/index.php?p=mhs&status=success&message=Data berhasil diupdate');
-            exit;
-        }
-    } 
-    
-    else if ($_GET['proses'] == 'delete') {
-        if (empty($_GET['nim'])) {
-            throw new Exception("NIM tidak ditemukan!");
-        }
+                    $stmt = $db->prepare("UPDATE mahasiswa SET 
+                        nama = ?, 
+                        tgl_lahir = ?, 
+                        jenis_kelamin = ?, 
+                        hobi = ?, 
+                        email = ?, 
+                        no_telp = ?, 
+                        alamat = ? 
+                        WHERE nim = ?");
+                    
+                    $stmt->execute([
+                        $_POST['nama'],
+                        $tanggal,
+                        $_POST['jenis_kelamin'],
+                        $hobi,
+                        $_POST['email'],
+                        $_POST['no_telp'],
+                        $_POST['alamat'],
+                        $_POST['nim']
+                    ]);
 
-        $stmt = $db->prepare("DELETE FROM mahasiswa WHERE nim = ?");
-        $result = $stmt->execute([$_GET['nim']]);
-        
-        if ($result) {
-            header('Location: ../frontend/index.php?p=mhs&status=success&message=Data berhasil dihapus');
-            exit;
-        }
+                    echo "<script>
+                        alert('Data Berhasil Diperbarui');
+                        window.location.href='../frontend/index.php?p=mhs';
+                    </script>";
+                }
+            } catch(PDOException $e) {
+                echo "<script>
+                    alert('Data Gagal Diperbarui: " . $e->getMessage() . "');
+                    window.location.href='../frontend/index.php?p=mhs';
+                </script>";
+            }
+            break;
+
+        case 'delete':
+            try {
+                $stmt = $db->prepare("DELETE FROM mahasiswa WHERE nim = ?");
+                $stmt->execute([$_GET['nim']]);
+
+                echo "<script>
+                    alert('Data Berhasil Dihapus');
+                    window.location.href='../frontend/index.php?p=mhs';
+                </script>";
+            } catch(PDOException $e) {
+                echo "<script>
+                    alert('Data Gagal Dihapus: " . $e->getMessage() . "');
+                    window.location.href='../frontend/index.php?p=mhs';
+                </script>";
+            }
+            break;
     }
-
-} catch(PDOException $e) {
-    header('Location: ../frontend/index.php?p=mhs&status=error&message=' . urlencode($e->getMessage()));
-    exit;
-} catch(Exception $e) {
-    header('Location: ../frontend/index.php?p=mhs&status=error&message=' . urlencode($e->getMessage()));
-    exit;
 }
 ?>
+
+
+

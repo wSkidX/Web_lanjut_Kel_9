@@ -145,17 +145,12 @@ switch ($aksi) {
                     <input type="hidden" name="user_id" value="<?= $_SESSION['user']['id'] ?>">
 
                     <div class="mb-3">
-                        <label class="form-label">Penulis</label>
-                        <input type="text" class="form-control" value="<?= htmlspecialchars($_SESSION['user']['nama']) ?>" disabled>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Judul</label>
+                        <label class="form-label">Judul <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="judul" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Kategori</label>
+                        <label class="form-label">Kategori <span class="text-danger">*</span></label>
                         <select name="kategori_id" class="form-select" required>
                             <option value="">Pilih Kategori</option>
                             <?php
@@ -173,15 +168,13 @@ switch ($aksi) {
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">File Upload</label>
-                        <input type="file" class="form-control" name="fileToUpload" id="file-upload" accept="image/*">
-                        <div id="preview-container" class="mt-2">
-                            <img src="#" alt="Preview" id="file-preview" style="max-width: 300px; display: none;">
-                        </div>
+                        <label class="form-label">File Gambar</label>
+                        <input type="file" class="form-control" name="fileToUpload" accept="image/*">
+                        <small class="text-muted">Format: JPG, JPEG, PNG. Max: 5MB</small>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Isi Berita</label>
+                        <label class="form-label">Isi Berita <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="isi_berita" rows="5" required></textarea>
                     </div>
 

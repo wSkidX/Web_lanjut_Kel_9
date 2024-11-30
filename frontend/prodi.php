@@ -125,7 +125,7 @@ switch ($aksi) {
 
     case 'edit':
     try {
-        $stmt = $dbh->prepare("SELECT * FROM prodi WHERE id = ?");
+        $stmt = $db->prepare("SELECT * FROM prodi WHERE id = ?");
         $stmt->execute([$_GET['id']]);
         $data_prodi = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>

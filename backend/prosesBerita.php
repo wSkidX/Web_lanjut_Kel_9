@@ -13,6 +13,11 @@ chmod($upload_dir, 0777);
 
 try {
     if ($_GET['proses'] == 'insert') {
+        // Validasi input
+        if (empty($_POST['judul']) || empty($_POST['kategori_id']) || empty($_POST['isi_berita'])) {
+            throw new Exception("Semua field harus diisi");
+        }
+        
         // Handle file upload
         $file_upload = '';
         if (isset($_FILES['fileToUpload']) && $_FILES['fileToUpload']['error'] == 0) {
@@ -37,20 +42,27 @@ try {
             }
         }
 
-        $stmt = $db->prepare("INSERT INTO berita (user_id, kategori_id, judul, file_upload, isi_berita, created_at) 
-                             VALUES (?, ?, ?, ?, ?, NOW())");
-        
-        $result = $stmt->execute([
-            $_SESSION['user']['id'],
-            $_POST['kategori_id'],
-            $_POST['judul'],
-            $file_upload,
-            $_POST['isi_berita']
-        ]);
-        
-        if ($result) {
-            header('Location: ../frontend/index.php?p=berita');
-            exit;
+        try {
+            $stmt = $db->prepare("INSERT INTO berita (user_id, kategori_id, judul, file_upload, isi_berita, created_at) 
+                                 VALUES (?, ?, ?, ?, ?, NOW())");
+            
+            $result = $stmt->execute([
+                $_POST['user_id'],
+                $_POST['kategori_id'], 
+                $_POST['judul'],
+                $file_upload,
+                $_POST['isi_berita']
+            ]);
+            
+            if ($result) {
+                $_SESSION['success'] = "Berita berhasil ditambahkan";
+                header('Location: ../frontend/index.php?p=berita');
+                exit;
+            } else {
+                throw new Exception("Gagal menyimpan berita");
+            }
+        } catch(PDOException $e) {
+            throw new Exception("Database Error: " . $e->getMessage());
         }
     } 
     

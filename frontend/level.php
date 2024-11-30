@@ -11,7 +11,7 @@ switch ($aksi) {
     <div class="container-fluid px-4">
         <h1 class="mt-4">Manajemen Level</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="../frontend/index.php">Dashboard</a></li>
             <li class="breadcrumb-item active">Level</li>
         </ol>
         <div class="card mb-4">
@@ -21,7 +21,7 @@ switch ($aksi) {
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <a href="index.php?p=level&aksi=input" class="btn btn-primary">
+                    <a href="../frontend/index.php?p=level&aksi=input" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Tambah Level
                     </a>
                 </div>
@@ -29,6 +29,7 @@ switch ($aksi) {
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>ID Level</th>
                             <th>Nama Level</th>
                             <th>Keterangan</th>
                             <th>Aksi</th>
@@ -37,17 +38,18 @@ switch ($aksi) {
                     <tbody>
                     <?php
                     try {
-                        $stmt = $db->query("SELECT * FROM level");
+                        $stmt = $db->query("SELECT * FROM level ORDER BY id ASC");
                         $no = 1;
                         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     ?>
                         <tr>
                             <td><?= $no++ ?></td>
+                            <td><?= htmlspecialchars($data['id']) ?></td>
                             <td><?= htmlspecialchars($data['nama_level']) ?></td>
                             <td><?= htmlspecialchars($data['keterangan']) ?></td>
                             <td class="text-center" style="white-space: nowrap;">
                                 <div class="btn-group" role="group">
-                                    <a href="index.php?p=level&aksi=edit&id=<?= $data['id'] ?>" 
+                                    <a href="../frontend/index.php?p=level&aksi=edit&id=<?= $data['id'] ?>" 
                                        class="btn btn-warning btn-sm me-1" 
                                        data-bs-toggle="tooltip" 
                                        title="Edit">
@@ -83,8 +85,8 @@ switch ($aksi) {
     <div class="container-fluid px-4">
         <h1 class="mt-4">Tambah Level</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="index.php?p=level">Level</a></li>
+            <li class="breadcrumb-item"><a href="../frontend/index.php">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="../frontend/index.php?p=level">Level</a></li>
             <li class="breadcrumb-item active">Tambah Level</li>
         </ol>
         <div class="card mb-4">
@@ -94,6 +96,12 @@ switch ($aksi) {
             </div>
             <div class="card-body">
                 <form action="../backend/prosesLevel.php?proses=insert" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">ID Level</label>
+                        <input type="number" class="form-control" name="id" required>
+                        <small class="form-text text-muted">
+                            ID Level
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Nama Level</label>
                         <input type="text" class="form-control" name="nama_level" required>
@@ -127,8 +135,8 @@ switch ($aksi) {
     <div class="container-fluid px-4">
         <h1 class="mt-4">Edit Level</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="index.php?p=level">Level</a></li>
+            <li class="breadcrumb-item"><a href="../frontend/index.php">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="../frontend/index.php?p=level">Level</a></li>
             <li class="breadcrumb-item active">Edit Level</li>
         </ol>
         <div class="card mb-4">
@@ -153,7 +161,7 @@ switch ($aksi) {
                         <button type="submit" class="btn btn-primary" name="submit">
                             <i class="fas fa-save"></i> Update
                         </button>
-                        <a href="index.php?p=level" class="btn btn-secondary">
+                        <a href="../frontend/index.php?p=level" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
                     </div>
