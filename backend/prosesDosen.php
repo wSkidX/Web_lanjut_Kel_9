@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'koneksi.php';
 
 if ($_GET['proses'] == 'insert') {
@@ -17,12 +18,16 @@ if ($_GET['proses'] == 'insert') {
             ]);
 
             if ($result) {
-                echo "<script>alert('Data Berhasil Ditambahkan'); 
-                      window.location.href='../frontend/index.php?p=dosen';</script>";
+                echo "<script>
+                    alert('Data Berhasil Ditambahkan');
+                    window.location.href='../frontend/index.php?p=dosen';
+                </script>";
             }
         } catch(PDOException $e) {
-            echo "<script>alert('Data Gagal Ditambahkan'); 
-                  window.location.href='../frontend/index.php?p=dosen&aksi=input';</script>";
+            echo "<script>
+                alert('Data Gagal Ditambahkan: " . $e->getMessage() . "');
+                window.location.href='../frontend/index.php?p=dosen&aksi=input';
+            </script>";
         }
     }
 }
@@ -30,14 +35,19 @@ if ($_GET['proses'] == 'insert') {
 if ($_GET['proses'] == 'delete') {
     try {
         $stmt = $db->prepare("DELETE FROM dosen WHERE id = ?");
-        $hapus = $stmt->execute([$_GET['id']]);
+        $result = $stmt->execute([$_GET['id']]);
         
-        if ($hapus) {
-            header("Location: ../frontend/index.php?p=dosen");
+        if ($result) {
+            echo "<script>
+                alert('Data Berhasil Dihapus');
+                window.location.href='../frontend/index.php?p=dosen';
+            </script>";
         }
     } catch(PDOException $e) {
-        echo "<script>alert('Data Gagal Dihapus'); 
-              window.location.href='../frontend/index.php?p=dosen';</script>";
+        echo "<script>
+            alert('Data Gagal Dihapus: " . $e->getMessage() . "');
+            window.location.href='../frontend/index.php?p=dosen';
+        </script>";
     }
 }
 
@@ -65,11 +75,16 @@ if ($_GET['proses'] == 'edit') {
             ]);
 
             if ($result) {
-                echo "<script>window.location.href='../frontend/index.php?p=dosen'</script>";
+                echo "<script>
+                    alert('Data Berhasil Diperbarui');
+                    window.location.href='../frontend/index.php?p=dosen';
+                </script>";
             }
         } catch(PDOException $e) {
-            echo "<script>alert('Data Gagal Diperbarui'); 
-                  window.location.href='../frontend/index.php?p=dosen&aksi=edit&id=".$_POST['id']."';</script>";
+            echo "<script>
+                alert('Data Gagal Diperbarui: " . $e->getMessage() . "');
+                window.location.href='../frontend/index.php?p=dosen&aksi=edit&id=".$_POST['id']."';
+            </script>";
         }
     }
 }

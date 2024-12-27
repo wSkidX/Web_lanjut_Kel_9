@@ -1,4 +1,11 @@
 <?php
+session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+error_log("POST Data: " . print_r($_POST, true));
+error_log("GET Data: " . print_r($_GET, true));
+
 include 'koneksi.php';
 
 if (isset($_GET['proses'])) {
@@ -16,7 +23,7 @@ if (isset($_GET['proses'])) {
                     $stmt = $db->prepare("INSERT INTO mahasiswa (nim, nama, tgl_lahir, jenis_kelamin, hobi, email, no_telp, alamat) 
                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     
-                    $stmt->execute([
+                    $result = $stmt->execute([
                         $_POST['nim'],
                         $_POST['nama'],
                         $tanggal,
@@ -27,10 +34,12 @@ if (isset($_GET['proses'])) {
                         $_POST['alamat']
                     ]);
 
-                    echo "<script>
-                        alert('Data Berhasil Ditambahkan');
-                        window.location.href='../frontend/index.php?p=mhs';
-                    </script>";
+                    if ($result) {
+                        echo "<script>
+                            alert('Data Berhasil Ditambahkan');
+                            window.location.href='../frontend/index.php?p=mhs';
+                        </script>";
+                    }
                 }
             } catch(PDOException $e) {
                 echo "<script>
@@ -58,7 +67,7 @@ if (isset($_GET['proses'])) {
                         alamat = ? 
                         WHERE nim = ?");
                     
-                    $stmt->execute([
+                    $result = $stmt->execute([
                         $_POST['nama'],
                         $tanggal,
                         $_POST['jenis_kelamin'],
@@ -69,10 +78,12 @@ if (isset($_GET['proses'])) {
                         $_POST['nim']
                     ]);
 
-                    echo "<script>
-                        alert('Data Berhasil Diperbarui');
-                        window.location.href='../frontend/index.php?p=mhs';
-                    </script>";
+                    if ($result) {
+                        echo "<script>
+                            alert('Data Berhasil Diperbarui');
+                            window.location.href='../frontend/index.php?p=mhs';
+                        </script>";
+                    }
                 }
             } catch(PDOException $e) {
                 echo "<script>
@@ -85,12 +96,14 @@ if (isset($_GET['proses'])) {
         case 'delete':
             try {
                 $stmt = $db->prepare("DELETE FROM mahasiswa WHERE nim = ?");
-                $stmt->execute([$_GET['nim']]);
-
-                echo "<script>
-                    alert('Data Berhasil Dihapus');
-                    window.location.href='../frontend/index.php?p=mhs';
-                </script>";
+                $result = $stmt->execute([$_GET['nim']]);
+                
+                if ($result) {
+                    echo "<script>
+                        alert('Data Berhasil Dihapus');
+                        window.location.href='../frontend/index.php?p=mhs';
+                    </script>";
+                }
             } catch(PDOException $e) {
                 echo "<script>
                     alert('Data Gagal Dihapus: " . $e->getMessage() . "');
@@ -100,6 +113,11 @@ if (isset($_GET['proses'])) {
             break;
     }
 }
+
+// Jika tidak ada proses yang valid
+$_SESSION['error'] = "Aksi tidak valid";
+header('Location: ../frontend/index.php?p=mhs');
+exit;
 ?>
 
 
