@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'koneksi.php';
 
 try {
@@ -17,7 +18,10 @@ try {
         ]);
 
         if ($result) {
-            header('Location: ../frontend/index.php?p=matakuliah');
+            echo "<script>
+                alert('Data Berhasil Ditambahkan');
+                window.location.href='../frontend/index.php?p=matakuliah';
+            </script>";
         }
     }
     
@@ -44,7 +48,10 @@ try {
         ]);
 
         if ($result) {
-            header('Location: ../frontend/index.php?p=matakuliah');
+            echo "<script>
+                alert('Data Berhasil Diperbarui');
+                window.location.href='../frontend/index.php?p=matakuliah';
+            </script>";
         }
     }
     
@@ -53,12 +60,17 @@ try {
         $result = $stmt->execute([$_GET['id']]);
         
         if ($result) {
-            header('Location: ../frontend/index.php?p=matakuliah');
+            echo "<script>
+                alert('Data Berhasil Dihapus');
+                window.location.href='../frontend/index.php?p=matakuliah';
+            </script>";
         }
     }
 
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
-    exit;
+    echo "<script>
+        alert('Error: " . $e->getMessage() . "');
+        window.location.href='../frontend/index.php?p=matakuliah';
+    </script>";
 }
 ?>

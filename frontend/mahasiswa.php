@@ -90,6 +90,22 @@ switch ($aksi) {
         </div>
     </div>
 
+<?php if(isset($_SESSION['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= $_SESSION['success'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if(isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= $_SESSION['error'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
 <?php
     break;
 
@@ -108,7 +124,7 @@ switch ($aksi) {
                 Form Tambah Mahasiswa
             </div>
             <div class="card-body">
-                <form action="../backend/prosesMahasiswa.php?proses=insert" method="post">
+                <form action="../backend/prosesMahasiswa.php?proses=insert" method="POST">
                     <div class="form-grid">
                         <div class="mb-3">
                             <label class="form-label">NIM</label>
@@ -191,7 +207,9 @@ switch ($aksi) {
                             <textarea class="form-control" rows="3" name="alamat" required></textarea>
                         </div>
                         <div class="btn-group-responsive">
-                            <button type="submit" class="btn btn-primary" name="submit"><i class="fas fa-save"></i> Simpan</button>
+                            <button type="submit" name="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Submit
+                            </button>
                             <button type="reset" class="btn btn-secondary" name="reset"><i class="fas fa-undo"></i> Reset</button>
                         </div>
                     </div>
@@ -340,4 +358,20 @@ switch ($aksi) {
             ]
         });
     });
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validasi form
+    let nim = document.querySelector('input[name="nim"]').value;
+    let nama = document.querySelector('input[name="nama"]').value;
+    
+    if (!nim || !nama) {
+        alert('Semua field harus diisi!');
+        return;
+    }
+    
+    // Jika validasi sukses, submit form
+    this.submit();
+});
 </script>

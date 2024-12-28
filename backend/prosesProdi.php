@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'koneksi.php';
 
 try {
@@ -10,8 +11,10 @@ try {
         ]);
 
         if ($result) {
-            header('Location: ../frontend/index.php?p=prodi');
-            exit;
+            echo "<script>
+                alert('Data Berhasil Ditambahkan');
+                window.location.href='../frontend/index.php?p=prodi';
+            </script>";
         }
     }
     
@@ -24,8 +27,10 @@ try {
         ]);
 
         if ($result) {
-            header('Location: ../frontend/index.php?p=prodi');
-            exit;
+            echo "<script>
+                alert('Data Berhasil Diperbarui');
+                window.location.href='../frontend/index.php?p=prodi';
+            </script>";
         }
     }
     
@@ -34,13 +39,17 @@ try {
         $result = $stmt->execute([$_GET['id']]);
         
         if ($result) {
-            header('Location: ../frontend/index.php?p=prodi');
-            exit;
+            echo "<script>
+                alert('Data Berhasil Dihapus');
+                window.location.href='../frontend/index.php?p=prodi';
+            </script>";
         }
     }
 
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
-    exit;
+    echo "<script>
+        alert('Error: " . $e->getMessage() . "');
+        window.location.href='../frontend/index.php?p=prodi';
+    </script>";
 }
 ?>
